@@ -1,0 +1,21 @@
+def compute(a11, a12, a21, a22, b1, b2):
+  r1 = a11 * b1
+  r1 = r1 + a12 * b2
+
+  r2 = a21 * b1
+  r2 = r2 + a22 * b2
+
+  return r1, r2
+
+// consider 2 element vector
+def main(b1, b2):
+
+  a11 = 18 // 0x12
+  a12 = 5  // 0x5
+  a21 = 3  // 0x3
+  a22 = 2  // 0x2
+
+  r1, r2 = compute(a11, a12, a21, a22, b1, b2)
+
+  return r1, r2
+
