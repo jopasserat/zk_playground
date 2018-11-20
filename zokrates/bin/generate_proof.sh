@@ -14,7 +14,7 @@ compiled_code=${1:-output/hello_world/out}
 shift
 witness=$*
 
-ZOKRATES=/root/ZoKrates/target/release/zokrates
+ZOKRATES=/home/zokrates/zokrates
 SUCCESSFUL_PROOF_DELIMITER="generate-proof successful: true"
 
 # concatenate inputs params as a way to uniquely name witnesses/proofs

@@ -13,7 +13,7 @@
 input_app=${1:-apps/hello_world.code}
 output_folder=${2:-output}
 
-ZOKRATES=/root/ZoKrates/target/release/zokrates
+ZOKRATES=/home/zokrates/zokrates
 output_folder_app="${output_folder}/$(basename ${input_app} .code)"
 output_code="${output_folder_app}/out"
 
