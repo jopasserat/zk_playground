@@ -1,0 +1,164 @@
+// k-medoids clustering using Partitioning Around Medoids (PAM)
+// k-medoids is more robust, but harder to compute than, k-means.
+// adapted from Pequin example
+
+def arrayToArray4(field[600] a, field offset) -> (field[4]):
+  field[4] tuple = [a[offset], a[offset+1], a[offset+2], a[offset+3]]
+  return tuple
+
+// hardcoded: d = 4 in this example
+def getDistance(field[4] a, field[4] b) -> (field):
+  field diff = 0
+  //Squared euclidean distance
+  field distance = 0
+  for field i in 0..4 do
+    diff = a[i] - b[i]
+    distance = distance + diff * diff
+  endfor
+
+  return distance
+
+def getPointCost(field[4] refPoint, field[600] A) -> (field):
+
+  field cndPointCost = 0
+  //the first k datapoints of A are the medoids.
+
+  field[4] point = arrayToArray4(A, 0)
+  field pointCost = getDistance(refPoint, point)
+  for field i in 1..3 do
+    point = arrayToArray4(A, i)
+    cndPointCost = getDistance(refPoint, point)
+    // TODO can we get rid of this inequality?
+    pointCost = if cndPointCost < pointCost then cndPointCost else pointCost fi
+  endfor
+
+  return pointCost
+
+def getCost(field[600] A) -> (field):
+
+  field cost = 0
+  for field i in 0..150 do
+    field offset = i * 4
+    field[4] point = arrayToArray4(A, offset)
+    cost = cost + getPointCost(point, A)
+  endfor
+
+  return cost
+
+def updateDistFromHell(field optDist, field k, field[4] currentPoint, field[600] A) -> (field, field):
+
+    field[4] clusterK = arrayToArray4(A, k)
+    field newDist = getDistance(clusterK, currentPoint)
+
+    field shouldUpdate = if newDist < optDist then 1 else 0 fi
+
+    field a = if shouldUpdate == 0 then newDist else optDist fi
+    field b = if shouldUpdate == 0 then k else 0 fi
+
+    return a, b
+
+// workaround for:
+// a, b = if test then funcCall(x, y) else funcCall(a,b) fi
+// TODO report
+def updateDist(field optDist, field newDist, field k) -> (field, field):
+
+    field shouldUpdate = if newDist < optDist then 1 else 0 fi
+
+    field a = if shouldUpdate == 0 then newDist else optDist fi
+    field b = if shouldUpdate == 0 then k else 0 fi
+
+    return a, b
+
+
+//Classify points (Note - a medoid may end up in a different
+//cluster than its own, if two medoids have the same coordinates)
+def classifyPoints(field[600] A) -> (field[150]):
+
+  field[150] c = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+  // no 2D arrays
+  field[4] cluster0 = arrayToArray4(A, 0)
+  field[4] cluster1 = arrayToArray4(A, 4)
+  field[4] cluster2 = arrayToArray4(A, 8)
+
+  for field i in 0..150 do
+    field[4] currentPoint = arrayToArray4(A, i)
+    field optDist = getDistance(cluster0, currentPoint)
+
+///// loop + func-call == 12M+ constraints
+//    for field k in 1..3 do
+//      optDist, currentC = updateDistFromHell(optDist, k, currentPoint, A)
+//      // small glitch with direct assignment to array element it seems => TODO report
+//      c[i] = currentC
+//    endfor
+
+///// unrolled alternative == ~479k constraints
+    field newDist = getDistance(cluster1, currentPoint)
+    optDist, currentC = updateDist(optDist, newDist, 1)
+    // small glitch with direct assignment to array element it seems => TODO report
+    c[i] = currentC
+
+    newDist = getDistance(cluster2, currentPoint)
+    optDist, currentC = updateDist(optDist, newDist, 2)
+    c[i] = currentC
+
+  endfor
+
+  return c
+
+// FIXME another trick due to impossibility to have two function calls in each branch of if/else statement
+// <> to
+// currentCost, newAi, newAj = if newCost < currentCost then assignThree(newCost, A[i], A[j]) else assignThree(currentCost, A[j], A[i]) fi
+def updateCost(field currentCost, field newCost, field Ai, field Aj) -> (field, field, field):
+  field shouldUpdateCost = if newCost < currentCost then 1 else 0 fi
+
+  field a = if shouldUpdateCost == 1 then newCost else currentCost fi
+  field b = if shouldUpdateCost == 1 then Ai else Aj fi
+  field c = if shouldUpdateCost == 1 then Aj else Ai fi
+
+  return a, b, c
+
+// ideally make the data private???
+//def main(field k, field L, field d, field m, field[600] A) -> (field[5]):
+def main(field k, field L, field d, field m, field[600] A) -> (field[150]):
+
+  //Randomly choose medoids
+  //XXX - currently we just pick the first k datapoints as the medoids
+
+  //Convention: the medoids are the first k datapoints
+
+  //Initial cost
+  field currentCost = getCost(A)
+
+  // TODO
+  //Swap phase
+  // L = 3
+  for field iter in 0..3 do
+    // k = 3
+    for field i in 0..3 do
+      //Overwrite medoid i with a nonmedoid point in the best way,
+      //or leave it as is if no better point found
+      // m = 150
+      for field j in 3..150 do
+        //This is a possible medoid - nonmedoid swap.
+        //Compute the change in cost as a function of the swap
+        field backup = A[i]
+        A[i] = A[j]
+        A[j] = backup
+
+        field newCost = getCost(A)
+        //Is it an improvement?
+        // FIXME this is gonna be costly...
+        currentCost, newAi, newAj = updateCost(currentCost, newCost, A[i], A[j])
+        A[i] = newAi
+        A[j] = newAj
+      endfor
+    endfor
+  endfor
+
+
+  //field[5] r = [0,1,2,3,4]
+  field[150] r = classifyPoints(A)
+
+  return r
+
