@@ -21,7 +21,6 @@ mkdir -p "${output_folder_app}"
 
 "${ZOKRATES}" compile -i "${input_app}" -o "${output_code}"
 "${ZOKRATES}" setup -i "${output_code}" \
-  -m "${output_folder_app}/variables.inf" \
   -p "${output_folder_app}/proving.key" \
   -v "${output_folder_app}/verification.key"
 "${ZOKRATES}" export-verifier \
