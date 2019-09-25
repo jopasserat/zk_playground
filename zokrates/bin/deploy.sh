@@ -16,6 +16,7 @@ SOURCE_DIR=$(readlink -f $(dirname $0))
 
 mkdir -p "${WORKDIR}/contracts"
 cp "${verifier_contract}" "${WORKDIR}/contracts/"
+cp "${SOURCE_DIR}/../zokrates+web3js/truffle-config.js" "${WORKDIR}/truffle-config.js"
 cd "${WORKDIR}" || exit 1
 truffle compile
 truffle migrate
