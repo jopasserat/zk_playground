@@ -3,7 +3,7 @@
 command_line=${*:-/bin/bash}
 
 docker run \
-  --rm -it \
+  --rm \
   -w /my_example \
   --volume "$(pwd)":/my_example \
   zokrates/zokrates \
