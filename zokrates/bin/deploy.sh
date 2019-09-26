@@ -12,12 +12,12 @@
 
 verifier_contract=${1:-output/hello_world/verifier.sol}
 WORKDIR=${2:-zokrates+web3js}
-SOURCE_DIR=$(readlink -f $(dirname $0))
+SOURCE_DIR="$(readlink -f $(dirname $0))/../zokrates+web3js"
 
 mkdir -p "${WORKDIR}/contracts"
 cp "${verifier_contract}" "${WORKDIR}/contracts/"
-cp "${SOURCE_DIR}/../zokrates+web3js/truffle-config.js" "${WORKDIR}/truffle-config.js"
+cp "${SOURCE_DIR}/truffle-config.js" "${WORKDIR}/truffle-config.js"
+cp "${SOURCE_DIR}/.env" "${WORKDIR}/.env"
 cd "${WORKDIR}" || exit 1
-truffle compile
 truffle migrate
 
