@@ -27,7 +27,7 @@
 - Install:
   - `docker`
   - `truffle`
-  - `ganache`
+  - `ganache || hyperledger besu` (only two clients tested so far)
 
 ### Classic deployment
 
@@ -37,6 +37,7 @@
 # note that this last stage runs on the host, not in docker
 ./bin/deploy.sh output/hello_world/verifier.sol
 cd zokrates+web3js
+# here you can update the content of the .env file to accommodate your own network
 npm run dev
 ```
 
