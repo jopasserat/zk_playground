@@ -38,6 +38,7 @@
 ./bin/deploy.sh output/hello_world/verifier.sol
 cd zokrates+web3js
 # here you can update the content of the .env file to accommodate your own network
+# and call `truffle migrate` again
 npm run dev
 ```
 
