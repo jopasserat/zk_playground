@@ -31,17 +31,9 @@ witness_path="${output_path}/witness${params_list}"
   -i "${compiled_code}" \
   -o "${witness_path}"
 
-bash -s << EOF > "${output_path}/proof${params_list}.json"
-  echo '{'
-  "${ZOKRATES}" generate-proof \
-      -w "${witness_path}" \
-      -i "${output_path}/variables.inf" \
-      -p "${output_path}/proving.key" |\
-    grep "${SUCCESSFUL_PROOF_DELIMITER}" -B 8 |\
-    grep -v "${SUCCESSFUL_PROOF_DELIMITER}" |\
-    sed -e 's,\(0x\w\+\),"\1",g' |\
-    sed -e 's/\(.*\) = \(.*\)/"\1": [\2]/g' |\
-    awk '{printf "%s%s",sep,\$0; sep=",\n"} END{print ""}'
-  echo '}'
-EOF
+"${ZOKRATES}" generate-proof \
+    -w "${witness_path}" \
+    -i "${output_path}/out" \
+    -p "${output_path}/proving.key" \
+    -j "${output_path}/proof${params_list}.json"
 
