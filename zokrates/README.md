@@ -35,10 +35,9 @@
 ./zokrates.sh bin/build_verifier.sh apps/hello_world.code output
 ./zokrates.sh bin/generate_proof.sh output/hello_world/out 2 2
 # note that this last stage runs on the host, not in docker
-./bin/deploy.sh output/hello_world/verifier.sol
+# the last .env parameter allows updating the truffle project's .env file to accommodate your own network
+./bin/deploy.sh output/hello_world/verifier.sol webapp ./.env
 cd zokrates+web3js
-# here you can update the content of the .env file to accommodate your own network
-# and call `truffle migrate` again
 npm run dev
 ```
 
